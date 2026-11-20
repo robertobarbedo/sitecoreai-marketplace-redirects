@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-// Self-hosted at build time by next/font: no visitor request reaches Google.
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+// Latin variable fonts from Google Fonts, committed in ./fonts so the build
+// never fetches from Google (a bad Google response broke a Vercel build with
+// "Cannot read properties of null (reading '1')" in next/font/google).
+const inter = localFont({
+  src: "./fonts/inter-latin-var.woff2",
+  weight: "400 800",
   display: "swap",
   variable: "--font-inter",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const jetbrainsMono = localFont({
+  src: "./fonts/jetbrains-mono-latin-var.woff2",
+  weight: "400 500",
   display: "swap",
   variable: "--font-jetbrains-mono",
 });

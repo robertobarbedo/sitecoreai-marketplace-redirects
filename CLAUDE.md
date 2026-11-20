@@ -44,6 +44,9 @@ header on purpose, so the same pattern is reused in the other apps.
   non-selectable heading, the rows are the live URLs with a language tag. URLs
   are shown **without** `//` or scheme (`www.example.com/pt`). Search
   placeholder is `Find...`.
+- New/Edit dialog: destination type is a real radio pair ("Page in this
+  site" / "External URL"), not a segmented toggle. The internal field has a
+  **Browse** button (content tree) instead of "Check".
 - No status column. A **Test** button per row and **Test all** instead.
 - New/Edit dialog shows the language in context and offers "all languages":
   one item, a version per site language, the same destination everywhere — no
@@ -128,6 +131,8 @@ function in `src/utils/sitecore-graphql.ts`:
    installed on, with a stable `tenantId`. If Full Screen reports several, the
    selector would appear there too and the remembered choice could differ from
    the environment the app was opened in.
+10. `listChildren` (content tree) — `item { children { nodes { itemId name
+   path hasChildren } } }`, the shape publishing-center already uses.
 
 ## Known limits (deliberate for v1)
 
@@ -135,7 +140,8 @@ function in `src/utils/sitecore-graphql.ts`:
   the URL and the app does not create intermediate items.
 - The From path of an existing redirect cannot be changed (that is a move/rename).
 - The internal destination is typed (URL path, Sitecore path or item ID) and
-  checked; there is no tree browser.
+  checked on blur, or picked with **Browse** (`content-tree-dialog.tsx`), a
+  lazy-loading tree rooted at the site's Home item (`rootPath + startItem`).
 - No Import CSV yet (Export exists). No bulk publish/delete.
 - Listing reads at most `SEARCH_MAX_PAGES × SEARCH_PAGE_SIZE` index documents.
 - After create/edit the row is inserted locally (`buildRow`) rather than
