@@ -41,7 +41,7 @@ Portal).
 ## What data the app handles
 
 - **Redirect data**: the redirect items of the selected site (item path,
-  destination link, last-modified date and user), destination item names and
+  destination link, last-modified date), destination item names and
   paths, and the site's live URLs. Read from and written to your environment
   in your browser only.
 - **Site setup**: per site, the redirect template and field, the item the

@@ -543,7 +543,6 @@ export interface RawRedirect {
   version: number;
   fieldValue: string;
   updated: string;
-  updatedBy: string;
 }
 
 interface SearchInnerItem {
@@ -554,7 +553,6 @@ interface SearchInnerItem {
   language?: { name?: string };
   target?: { value?: string | null } | null;
   updated?: { value?: string | null } | null;
-  updatedBy?: { value?: string | null } | null;
 }
 
 /**
@@ -604,7 +602,6 @@ export async function searchRedirects(
               language { name }
               target: field(name: "${escapeGraphQL(fieldName)}") { value }
               updated: field(name: "__Updated") { value }
-              updatedBy: field(name: "__Updated by") { value }
             }
           }
         }
@@ -627,7 +624,6 @@ export async function searchRedirects(
       version: inner.version ?? 1,
       fieldValue: inner.target?.value ?? "",
       updated: inner.updated?.value ?? "",
-      updatedBy: inner.updatedBy?.value ?? "",
     });
   }
 

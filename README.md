@@ -18,7 +18,7 @@ without leaving SitecoreAI.
   language's live URL (`www.example.com/pt`). Each site heading has a cog
   that opens its setup.
 - **Redirect list**: From path, destination, test result and last modified
-  date and user, with search, a filter by test result and CSV export.
+  date, with search, a filter by test result and CSV export.
 - **Create and edit**: send visitors to a page in the site or to an external
   URL. A page can be typed (URL path, Sitecore path or item ID) or picked
   with **Browse**, a content tree starting at the site's Home item.

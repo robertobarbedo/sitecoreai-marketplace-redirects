@@ -9,7 +9,7 @@ import { Icon } from "@/lib/icon";
 import { cn } from "@/lib/utils";
 import { ROW_PAGE_SIZE } from "@/src/constants";
 import type { RedirectRow, TestState } from "@/src/types/redirects";
-import { formatDate, formatUser } from "@/src/utils/format";
+import { formatDate } from "@/src/utils/format";
 
 const GRID =
   "grid grid-cols-[minmax(0,1.1fr)_24px_minmax(0,1.5fr)_190px_150px_150px] items-center gap-4 px-4";
@@ -171,11 +171,8 @@ export function RedirectTable({
                       </div>
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <div className="truncate">{formatDate(row.updated)}</div>
-                    <div className="truncate text-xs text-text-subtle">
-                      {formatUser(row.updatedBy)}
-                    </div>
+                  <div className="min-w-0 truncate">
+                    {formatDate(row.updated)}
                   </div>
                   <div className="flex items-center justify-end gap-1">
                     <Button

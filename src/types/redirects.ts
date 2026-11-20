@@ -75,7 +75,6 @@ export interface RedirectRow {
   /** Destination as a URL path below the site URL ("" when it is elsewhere). */
   targetRoute: string;
   updated: string;
-  updatedBy: string;
 }
 
 export type TestLevel = "working" | "warning" | "broken" | "error";

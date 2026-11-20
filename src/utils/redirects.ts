@@ -105,7 +105,6 @@ export async function loadRedirects(
       targetName: target?.name ?? "",
       targetRoute: target ? (routeOf(target.path, site.rootPath) ?? "") : "",
       updated: item.updated,
-      updatedBy: item.updatedBy,
     };
   });
 

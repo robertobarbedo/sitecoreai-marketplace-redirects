@@ -529,7 +529,6 @@ export default function RedirectManager() {
         targetName: target?.name ?? "",
         targetRoute: target ? (routeOf(target.path, context.rootPath) ?? "") : "",
         updated: new Date().toISOString(),
-        updatedBy: "",
       };
     },
     [client],

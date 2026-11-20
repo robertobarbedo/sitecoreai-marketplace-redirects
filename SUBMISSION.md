@@ -19,7 +19,7 @@ SXA redirects are items in the content tree: the item's path is the old URL and 
 
 Managing redirects:
 - One picker for site and language, showing each language's live URL
-- A list of every redirect of the site with its destination, last modified date and user, with search and CSV export
+- A list of every redirect of the site with its destination, last modified date, with search and CSV export
 - Create and edit redirects to a page in the site (typed, or picked from the content tree) or to an external URL
 - Create a redirect in every language of the site at once, with the same destination
 - "Publish immediately, then test the live URL", with live progress

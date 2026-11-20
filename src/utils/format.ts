@@ -35,13 +35,6 @@ export function formatDate(value: string): string {
   });
 }
 
-/** `sitecore\jane@example.com` → `jane@example.com`. */
-export function formatUser(value: string): string {
-  if (!value) return "—";
-  const slash = value.lastIndexOf("\\");
-  return slash >= 0 ? value.slice(slash + 1) : value;
-}
-
 /**
  * Comparison key for Sitecore GUIDs. The workflow definition query and the item
  * itself may report the same id in different shapes (`{ABC-…}` vs `abc…`), so
