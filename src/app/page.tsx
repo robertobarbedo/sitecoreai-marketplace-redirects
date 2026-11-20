@@ -329,6 +329,7 @@ export default function RedirectManager() {
   const language = selectedUrl?.language ?? DEFAULT_LANGUAGE;
   const base = selectedUrl?.base ?? "";
   const vercelBypass = setup?.vercelBypass ?? null;
+  const allowChains = setup?.allowChains ?? false;
 
   const siteContext = useMemo<SiteContext | null>(
     () =>
@@ -435,11 +436,11 @@ export default function RedirectManager() {
   const testOne = useCallback(
     async (row: RedirectRow) => {
       setTests((current) => ({ ...current, [row.key]: "running" }));
-      const result = await testRedirect(row, base, vercelBypass);
+      const result = await testRedirect(row, base, vercelBypass, allowChains);
       setTests((current) => ({ ...current, [row.key]: result }));
       if (result.level !== "working") setExpandedKey(row.key);
     },
-    [base, vercelBypass],
+    [base, vercelBypass, allowChains],
   );
 
   const testAll = useCallback(async () => {
@@ -464,7 +465,7 @@ export default function RedirectManager() {
         if (index >= targets.length) return;
         const row = targets[index];
         setTests((current) => ({ ...current, [row.key]: "running" }));
-        const result = await testRedirect(row, base, vercelBypass);
+        const result = await testRedirect(row, base, vercelBypass, allowChains);
         if (scanCancelRef.current) return;
         setTests((current) => ({ ...current, [row.key]: result }));
         done += 1;
@@ -482,7 +483,7 @@ export default function RedirectManager() {
       return cleaned;
     });
     setScan((current) => ({ ...current, running: false, finished: true }));
-  }, [rows, base, vercelBypass]);
+  }, [rows, base, vercelBypass, allowChains]);
 
   const stopScan = () => {
     scanCancelRef.current = true;
@@ -660,7 +661,7 @@ export default function RedirectManager() {
       }
 
       // 3 · publish
-      patch("publish", { status: "running", detail: "Sending to Experience Edge" });
+      patch("publish", { status: "running" });
       try {
         const outcome = await publishAndWait(
           client,
@@ -699,7 +700,7 @@ export default function RedirectManager() {
         await sleep(PUBLISH_TEST_DELAYS_MS[attempt]);
         if (closed()) break;
         patch("test", { detail: `${label}: requesting the URL` });
-        last = await testRedirect(row, base, vercelBypass);
+        last = await testRedirect(row, base, vercelBypass, allowChains);
         if (last.level !== "broken") break;
       }
 
@@ -713,7 +714,7 @@ export default function RedirectManager() {
       }
       finish(last);
     },
-    [client, env, siteContext, base, vercelBypass, allLanguages, buildRow],
+    [client, env, siteContext, base, vercelBypass, allowChains, allLanguages, buildRow],
   );
 
   const switchEnvironment = (next: EnvironmentContext) => {
@@ -969,7 +970,7 @@ export default function RedirectManager() {
                   />
                   <div>
                     <h1 className="text-lg font-bold text-on-surface">
-                      Redirect Manager
+                      Redirects
                     </h1>
                     <p className="text-[11px] text-text-subtle">
                       Manage redirect items for your SXA sites

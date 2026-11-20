@@ -43,6 +43,7 @@ export const DEFAULT_SITE_SETUP: SiteSetup = {
   rootPath: "",
   urls: {},
   publishOnSave: true,
+  allowChains: false,
   vercelBypass: null,
 };
 
@@ -58,6 +59,7 @@ export function getSiteSetup(
     templateId: stored.templateId || DEFAULT_SITE_SETUP.templateId,
     fieldName: stored.fieldName || DEFAULT_SITE_SETUP.fieldName,
     urls: { ...(stored.urls ?? {}) },
+    allowChains: stored.allowChains === true,
     vercelBypass: isVercelBypass(stored.vercelBypass)
       ? stored.vercelBypass
       : null,

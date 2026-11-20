@@ -2,7 +2,7 @@
   "name": "sitecoreai-marketplace-redirects-manager",
   "version": "1.0.0",
   "license": "Apache-2.0",
-  "description": "Sitecore Marketplace app: Redirect Manager for SitecoreAI — create, edit and test SXA redirect items per site and language",
+  "description": "Sitecore Marketplace app: Redirects for SitecoreAI — create, edit and test SXA redirect items per site and language",
   "scripts": {
     "dev": "next dev -p 5014",
     "dev:https": "next dev -p 5014 --experimental-https",

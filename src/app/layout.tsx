@@ -20,7 +20,7 @@ const jetbrainsMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Redirect Manager",
+  title: "Redirects",
   description:
     "SitecoreAI Marketplace app: create, edit and test the redirect items of your SXA sites",
 };

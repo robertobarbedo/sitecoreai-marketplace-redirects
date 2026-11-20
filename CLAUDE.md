@@ -1,4 +1,8 @@
-# Redirect Manager — notes for Claude Code
+# Redirects — notes for Claude Code
+
+The app is named **Redirects** (renamed from "Redirect Manager" on
+2026-11-20). The Sitecore settings item path still uses `Redirect Manager`
+on purpose: renaming it would orphan saved settings.
 
 ## Do NOT run or test this app standalone
 
@@ -37,7 +41,8 @@ header on purpose, so the same pattern is reused in the other apps.
 ## UI decisions (agreed with the user — keep)
 
 - Site setup (Settings) is tabbed per site: **General** (template, field,
-  root, live URLs, publish default) and **Vercel** (bypass secret).
+  root, live URLs, publish default, allow redirect chains) and **Vercel**
+  (bypass secret).
 - No top-level tabs on the main screen. The cog (top right) opens Settings; each site heading in the picker
   has its own cog that opens that site's setup.
 - Site + language is ONE grouped dropdown (`site-picker.tsx`): site name is a
@@ -65,6 +70,10 @@ URL hop by hop and returns status codes + URLs only.
 
 - Working: one redirect, final page 2xx, ends on the configured destination.
 - Warning: more than one redirect (chain), or ends on another URL.
+- **Allow redirect chains** (per site, `allowChains`, off by default): a
+  chain whose final page loads is Working ("OK · N redirects"), and the
+  "ends on another URL" check is skipped for it, since a chain usually ends
+  somewhere other than the configured destination.
 - Broken: first hop is not a 3xx (404 ⇒ probably unpublished), final page
   4xx/5xx, loop, more than 8 hops, destination item missing/empty.
 - `error` level = the test could not run (no live URL, sign-in not configured).

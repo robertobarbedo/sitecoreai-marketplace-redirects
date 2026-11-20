@@ -90,6 +90,7 @@ function toStored(setup: SiteSetup): Partial<SiteSetup> | null {
     usesSxaDefault(setup) &&
     !setup.rootPath.trim() &&
     setup.publishOnSave === DEFAULT_SITE_SETUP.publishOnSave &&
+    setup.allowChains === DEFAULT_SITE_SETUP.allowChains &&
     !setup.vercelBypass &&
     Object.keys(urls).length === 0;
   return isDefault ? null : { ...setup, rootPath: setup.rootPath.trim(), urls };
@@ -525,6 +526,23 @@ export function SettingsPage({
                   redirects when they are deleted
                 </span>
               </label>
+
+              <label className="flex items-start gap-2.5">
+                <Checkbox
+                  className="mt-0.5"
+                  checked={draft.allowChains}
+                  onChange={(event) =>
+                    update({ allowChains: event.target.checked })
+                  }
+                />
+                <span>
+                  Allow redirect chains
+                  <span className={cn(HELP, "block")}>
+                    A redirect that goes through more than one hop before the
+                    final page is reported as Working instead of a warning.
+                  </span>
+                </span>
+              </label>
             </div>
           ) : (
             <VercelPanel
@@ -565,8 +583,9 @@ export function SettingsPage({
         </section>
       </div>
 
-      <p className="text-center text-[11px] text-text-subtle">
-        Redirect Manager {process.env.NEXT_PUBLIC_APP_VERSION}
+      <p className="text-left text-[10px] text-[#94A3B8]">
+        Developed by Roberto Barbedo · Redirects · v
+        {process.env.NEXT_PUBLIC_APP_VERSION}
       </p>
     </>
   );

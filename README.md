@@ -1,4 +1,4 @@
-# Redirect Manager for SitecoreAI
+# Redirects for SitecoreAI
 
 A SitecoreAI Marketplace app (Full Screen extension point) for managing SXA
 redirect items: list, create, edit, delete and publish the redirects of a site,

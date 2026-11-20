@@ -157,10 +157,10 @@ export function RedirectTable({
                         type="button"
                         onClick={() => onToggleDetails(row.key)}
                         aria-expanded={expanded}
-                        title="Show test details"
-                        className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-primary/50"
+                        title={expanded ? "Hide test details" : "Show test details"}
+                        className="group cursor-pointer rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-primary/50"
                       >
-                        <ResultBadge state={state} />
+                        <ResultBadge state={state} expandable expanded={expanded} />
                       </button>
                     ) : (
                       <ResultBadge state={state} />

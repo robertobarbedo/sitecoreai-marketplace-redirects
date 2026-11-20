@@ -42,6 +42,8 @@ export async function testRedirect(
   base: string,
   /** The site's sealed Vercel bypass secret, when it has one. */
   vercelBypass: VercelBypass | null = null,
+  /** Site setting: a chain counts as working, not as a warning. */
+  allowChains = false,
 ): Promise<TestResult> {
   if (row.link.kind === "empty") {
     return result(
@@ -148,6 +150,18 @@ export async function testRedirect(
       "broken",
       `Destination returns ${last.status}`,
       `The redirect works, but the page it ends on answers ${last.status}.`,
+      hops,
+    );
+  }
+
+  // With chains allowed, a chain that ends on a working page is a success.
+  // The final URL usually differs from the configured destination in a chain
+  // (that is what the extra hop does), so the "another URL" check is skipped.
+  if (redirects > 1 && allowChains) {
+    return result(
+      "working",
+      `OK · ${redirects} redirects`,
+      `Visitors go through ${redirects} redirects before the final page, which loads. Chains are allowed for this site.`,
       hops,
     );
   }

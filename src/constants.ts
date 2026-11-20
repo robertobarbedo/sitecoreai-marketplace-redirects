@@ -1,4 +1,4 @@
-/** Item paths and tuning constants for the Redirect Manager app. */
+/** Item paths and tuning constants for the Redirects app. */
 
 /** Redirect items only exist (and are edited) in the authoring database. */
 export const MASTER_DATABASE = "master";

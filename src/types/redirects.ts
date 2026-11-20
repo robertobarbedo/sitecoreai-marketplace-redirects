@@ -13,6 +13,11 @@ export interface SiteSetup {
   urls: Record<string, string>;
   /** Default of the "Publish immediately" checkbox. */
   publishOnSave: boolean;
+  /**
+   * Treat a chain of redirects as working instead of a warning. Off by
+   * default; a per-site choice for sites where chains are expected.
+   */
+  allowChains: boolean;
   /** Vercel Protection Bypass for Automation secret, sealed on the server. */
   vercelBypass: VercelBypass | null;
 }
