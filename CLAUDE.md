@@ -53,6 +53,10 @@ header on purpose, so the same pattern is reused in the other apps.
   site" / "External URL"), not a segmented toggle. The internal field has a
   **Browse** button (content tree) instead of "Check".
 - No status column. A **Test** button per row and **Test all** instead.
+- Delete confirmation has an "Unpublish first, then delete" checkbox,
+  ticked every time it opens (not tied to the site's publish default).
+  Unticked = quick delete; the redirect stays live until the parent is
+  published.
 - New/Edit dialog shows the language in context and offers "all languages":
   one item, a version per site language, the same destination everywhere — no
   per-language values (sites can have 30+ languages).

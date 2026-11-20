@@ -32,6 +32,7 @@ import { RedirectTable } from "@/components/redirects/redirect-table";
 import { SettingsPage } from "@/components/redirects/settings-page";
 import { SitePicker, type SiteGroup } from "@/components/redirects/site-picker";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -202,6 +203,8 @@ export default function RedirectManager() {
   const [editor, setEditor] = useState<{ row: RedirectRow | null } | null>(null);
   const [deleting, setDeleting] = useState<RedirectRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  // "Unpublish first" in the delete confirmation; ticked each time it opens.
+  const [unpublishOnDelete, setUnpublishOnDelete] = useState(true);
 
   const [progress, setProgress] = useState<ProgressState | null>(null);
   const [flowRunning, setFlowRunning] = useState(false);
@@ -768,19 +771,20 @@ export default function RedirectManager() {
   const confirmDelete = async () => {
     if (!client || !env || !deleting || !setup) return;
     const row = deleting;
+    const unpublish = unpublishOnDelete;
     setIsDeleting(true);
     try {
       await removeRedirect(
         client,
         env.contextId,
         row,
-        setup.publishOnSave,
+        unpublish,
         allLanguages,
       );
       setRows((current) => current.filter((existing) => existing.key !== row.key));
       showToast(
         "Redirect deleted",
-        setup.publishOnSave
+        unpublish
           ? `${row.from} was unpublished and moved to the recycle bin.`
           : `${row.from} was moved to the recycle bin. It stays live until its parent page is published.`,
         "success",
@@ -1229,7 +1233,10 @@ export default function RedirectManager() {
                         }
                         onTest={(row) => void testOne(row)}
                         onEdit={(row) => setEditor({ row })}
-                        onDelete={setDeleting}
+                        onDelete={(row) => {
+                          setUnpublishOnDelete(true);
+                          setDeleting(row);
+                        }}
                         onPointTo={(row, url) => void pointTo(row, url)}
                         busy={busy}
                         base={base}
@@ -1283,11 +1290,24 @@ export default function RedirectManager() {
             </DialogHeader>
             <p>
               The redirect item is removed in every language and moved to the
-              recycle bin.{" "}
-              {setup?.publishOnSave
-                ? "It is unpublished first, so the URL stops redirecting on the live site."
-                : "It stays live until its parent page is published."}
+              recycle bin.
             </p>
+            <label className="flex items-start gap-2.5">
+              <Checkbox
+                className="mt-0.5"
+                checked={unpublishOnDelete}
+                disabled={isDeleting}
+                onChange={(event) => setUnpublishOnDelete(event.target.checked)}
+              />
+              <span>
+                Unpublish first, then delete
+                <span className="block text-xs text-text-subtle">
+                  {unpublishOnDelete
+                    ? "The URL stops redirecting on the live site right away."
+                    : "Quicker, but the redirect stays live until its parent page is published."}
+                </span>
+              </span>
+            </label>
             <DialogFooter>
               <Button
                 variant="outline"

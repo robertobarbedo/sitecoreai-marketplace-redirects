@@ -522,8 +522,7 @@ export function SettingsPage({
                   }
                 />
                 <span>
-                  Tick &ldquo;Publish immediately&rdquo; by default, and unpublish
-                  redirects when they are deleted
+                  Tick &ldquo;Publish immediately&rdquo; by default
                 </span>
               </label>
 
