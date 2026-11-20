@@ -94,6 +94,17 @@ changes).
   hop goes through `src/utils/ssrfGuard.ts` (shared file — keep identical
   across apps): https only, default port, public addresses only, DNS-pinned.
 - The route never returns headers or bodies, only `{ status, url }` per hop.
+- `/api/test` is rate-limited per user (`src/lib/rate-limit.ts`, 240/min,
+  in memory per instance, 429 + `Retry-After`); `testRedirect` waits and
+  retries up to 3 times so "Test all" slows down instead of failing.
+- Audit lines (JSON on stdout via the kit's `auditLog`): `redirect.test`
+  (sub, org, target host, hop count, result) and `secret.seal` (org, hosts).
+  Never the secret, headers or page content.
+- GraphQL: ids put into queries unescaped must be bare 32-hex
+  (`resolveItemsById` filters on `/^[0-9a-f]{32}$/`); everything else goes
+  through `escapeGraphQL`.
+- `HKDF_SALT` in `secret-crypto.ts` keeps the old `redirects-manager` name on
+  purpose — changing it breaks every saved Vercel secret.
 - Needs `NEXT_PUBLIC_AUTH0_CLIENT_ID` / `NEXT_PUBLIC_SITECORE_APP_ID`
   (`.env.example`). Without them everything except Test still works.
   `SECRET_ENCRYPTION_KEY` is needed only to save a Vercel bypass secret.

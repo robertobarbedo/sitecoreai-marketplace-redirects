@@ -436,7 +436,7 @@ export async function updateItemField(
           itemId: "${escapeGraphQL(target.itemId)}"
           language: "${escapeGraphQL(language)}"
           ${target.path ? `path: "${escapeGraphQL(target.path)}"` : ""}
-          ${target.version ? `version: ${target.version}` : ""}
+          ${target.version ? `version: ${Math.trunc(Number(target.version)) || 1}` : ""}
         }) {
           item { itemId }
         }
@@ -588,8 +588,8 @@ export async function searchRedirects(
         search(query: {
           index: "sitecore_master_index"
           searchStatement: { criteria: [
-            { operator: MUST, field: "_path", value: "${idKey(rootItemId)}" }
-            { operator: MUST, field: "_templates", value: "${idKey(templateId)}" }
+            { operator: MUST, field: "_path", value: "${escapeGraphQL(idKey(rootItemId))}" }
+            { operator: MUST, field: "_templates", value: "${escapeGraphQL(idKey(templateId))}" }
             { operator: MUST, field: "_language", value: "${escapeGraphQL(language)}" }
           ] }
           paging: { pageSize: ${SEARCH_PAGE_SIZE}, pageIndex: ${pageIndex} }
@@ -649,7 +649,11 @@ export async function resolveItemsById(
   language: string,
 ): Promise<Map<string, SitecoreItemRef | null>> {
   const resolved = new Map<string, SitecoreItemRef | null>();
-  const unique = [...new Set(ids.map(idKey))].filter((id) => id.length === 32);
+  // Only bare 32-hex GUIDs: these ids come from authored link fields and are
+  // put into the query unescaped.
+  const unique = [...new Set(ids.map(idKey))].filter((id) =>
+    /^[0-9a-f]{32}$/.test(id),
+  );
 
   for (let start = 0; start < unique.length; start += 40) {
     const chunk = unique.slice(start, start + 40);

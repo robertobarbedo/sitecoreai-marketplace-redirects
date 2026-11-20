@@ -37,6 +37,9 @@ export function expectedUrl(row: RedirectRow, base: string): string {
  * linked item still exist), then the live URL through the server route, which
  * follows the redirects and reports every hop.
  */
+/** How often one test waits out a 429 before reporting it. */
+const RATE_LIMIT_RETRIES = 3;
+
 export async function testRedirect(
   row: RedirectRow,
   base: string,
@@ -69,11 +72,22 @@ export async function testRedirect(
 
   let live: LiveResponse;
   try {
-    const response = await authedFetch("/api/test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: fullUrl(base, row.from), vercelBypass }),
-    });
+    const request = () =>
+      authedFetch("/api/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: fullUrl(base, row.from), vercelBypass }),
+      });
+    // The route rate-limits per user (see rate-limit.ts). A long "Test all"
+    // can reach it: wait as told and retry rather than report an error.
+    let response = await request();
+    for (let retry = 0; response.status === 429 && retry < RATE_LIMIT_RETRIES; retry++) {
+      const seconds = Number(response.headers.get("Retry-After")) || 5;
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.min(seconds, 60) * 1000),
+      );
+      response = await request();
+    }
     live = (await response.json().catch(() => ({}))) as LiveResponse;
     if (!response.ok) {
       return result(

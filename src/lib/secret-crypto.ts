@@ -27,7 +27,10 @@ const MIN_KEY_LENGTH = 16;
 
 const SEAL_VERSION = "v1";
 const IV_BYTES = 12;
+const TAG_BYTES = 16;
 const KEY_BYTES = 32;
+// Keeps the app's former name on purpose: changing the salt changes the key,
+// and every saved Vercel secret would stop opening.
 const HKDF_SALT = "sitecoreai-marketplace-redirects-manager";
 const HKDF_INFO = "vercel-protection-bypass";
 
@@ -118,13 +121,18 @@ export function openSecret(sealed: string, binding: SecretBinding): string {
   }
   const [, iv, tag, ciphertext] = parts;
   try {
-    const decipher = createDecipheriv(
-      "aes-256-gcm",
-      getKey(),
-      Buffer.from(iv, "base64url"),
-    );
+    const ivBytes = Buffer.from(iv, "base64url");
+    const tagBytes = Buffer.from(tag, "base64url");
+    // Full-length IV and tag only: Node accepts truncated GCM tags otherwise,
+    // which would weaken the authenticity check.
+    if (ivBytes.length !== IV_BYTES || tagBytes.length !== TAG_BYTES) {
+      throw new Error("Malformed seal");
+    }
+    const decipher = createDecipheriv("aes-256-gcm", getKey(), ivBytes, {
+      authTagLength: TAG_BYTES,
+    });
     decipher.setAAD(bindingData(binding));
-    decipher.setAuthTag(Buffer.from(tag, "base64url"));
+    decipher.setAuthTag(tagBytes);
     return Buffer.concat([
       decipher.update(Buffer.from(ciphertext, "base64url")),
       decipher.final(),

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { auditLog } from "@/src/lib/marketplace-auth/audit-log";
 import { sealSecret } from "@/src/lib/secret-crypto";
 import {
   callerOrganization,
@@ -45,15 +46,36 @@ export async function POST(request: Request) {
   }
 
   const org = await callerOrganization(request);
-  if (!org.ok) return org.response;
+  if (!org.ok) {
+    auditLog(request, {
+      event: "secret.seal",
+      outcome: "deny",
+      status: org.response.status,
+      reason: "no_organization",
+    });
+    return org.response;
+  }
 
   try {
     const sealed = sealSecret(secret, {
       organizationId: org.organizationId,
       hosts,
     });
+    // Who sealed a secret for which hosts; never the secret or the seal.
+    auditLog(request, {
+      event: "secret.seal",
+      outcome: "allow",
+      org: org.organizationId,
+      hosts,
+    });
     return NextResponse.json({ sealed, hosts });
   } catch (error) {
+    auditLog(request, {
+      event: "secret.seal",
+      outcome: "error",
+      org: org.organizationId,
+      reason: "seal_failed",
+    });
     return NextResponse.json(
       { error: describeSecretError(error) },
       { status: 500 },

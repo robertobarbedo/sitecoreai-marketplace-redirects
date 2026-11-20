@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { auditLog } from "@/src/lib/marketplace-auth/audit-log";
+import { requireSitecoreUser } from "@/src/lib/marketplace-auth/server";
+import { takeTestSlot } from "@/src/lib/rate-limit";
 import { openSecret } from "@/src/lib/secret-crypto";
 import {
   BYPASS_HEADER,
@@ -42,6 +45,32 @@ interface Hop {
 }
 
 export async function POST(request: Request) {
+  // middleware.ts already denied anonymous callers; this gives us who it is
+  // for the rate limit and the audit line.
+  const auth = await requireSitecoreUser(request);
+  if (!auth.ok) return auth.response;
+
+  const limit = takeTestSlot(auth.user.sub);
+  if (!limit.ok) {
+    auditLog(request, {
+      event: "redirect.test",
+      outcome: "deny",
+      status: 429,
+      sub: auth.user.sub,
+      org: auth.user.organizationId,
+      reason: "rate_limited",
+    });
+    return NextResponse.json(
+      {
+        error: `Too many tests in a short time. Try again in ${limit.retryAfterSeconds} s.`,
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -56,6 +85,22 @@ export async function POST(request: Request) {
   if (typeof url !== "string" || !url || url.length > MAX_URL_LENGTH) {
     return NextResponse.json({ error: "A URL is required" }, { status: 400 });
   }
+
+  // One audit line per test: who, which host, how it ended. Never the
+  // bypass secret, headers or page content.
+  const audit = (
+    outcome: "allow" | "deny" | "error",
+    detail: { result: string; hops?: number; reason?: string },
+  ) =>
+    auditLog(request, {
+      event: "redirect.test",
+      outcome,
+      sub: auth.user.sub,
+      org: auth.user.organizationId,
+      targetHost: hostOf(url),
+      bypass: vercelBypass ? true : undefined,
+      ...detail,
+    });
 
   // Optional Vercel Protection Bypass secret. It is opened only for the
   // caller's organization and the hosts it was sealed for, and only sent to
@@ -80,6 +125,7 @@ export async function POST(request: Request) {
         hosts: new Set(hosts),
       };
     } catch (error) {
+      audit("error", { result: "error", reason: "secret_unreadable" });
       return NextResponse.json({
         hops: [],
         outcome: "error",
@@ -95,16 +141,18 @@ export async function POST(request: Request) {
   try {
     for (;;) {
       if (seen.has(current)) {
+        audit("allow", { result: "loop", hops: hops.length });
         return NextResponse.json({ hops, outcome: "loop" });
       }
       if (hops.length >= MAX_HOPS) {
+        audit("allow", { result: "too-many", hops: hops.length });
         return NextResponse.json({ hops, outcome: "too-many" });
       }
       seen.add(current);
 
       const headers: Record<string, string> = {
         Accept: "text/html,application/xhtml+xml,*/*;q=0.8",
-        "User-Agent": "SitecoreAI-Redirect-Manager/1.0 (redirect test)",
+        "User-Agent": "SitecoreAI-Marketplace-Redirects/1.0 (redirect test)",
       };
       // Header, not query string: it is not echoed into Location headers or
       // the hop URLs returned to the browser, and needs no bypass cookie.
@@ -127,12 +175,18 @@ export async function POST(request: Request) {
       const location = response.headers.get("location");
       const isRedirect = response.status >= 300 && response.status < 400;
       if (!isRedirect || !location) {
+        audit("allow", { result: "final", hops: hops.length });
         return NextResponse.json({ hops, outcome: "final" });
       }
       current = new URL(location, current).toString();
     }
   } catch (error) {
     const blocked = error instanceof BlockedUrlError;
+    audit(blocked ? "deny" : "error", {
+      result: "error",
+      hops: hops.length,
+      reason: blocked ? "blocked_url" : "request_failed",
+    });
     return NextResponse.json({
       hops,
       outcome: "error",
