@@ -966,7 +966,7 @@ export default function RedirectManager() {
                 <div className="flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/arrow-fat-lines-right-duotone.svg"
+                    src="/signpost-duotone.svg"
                     alt=""
                     width={40}
                     height={40}

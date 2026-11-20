@@ -94,7 +94,7 @@ Both routes require a signed-in Sitecore Cloud user of this app.
 5. Under permissions, allow **File downloads** (for CSV export).
 6. Set the deployment URL to `https://<your-deployment>/`.
 7. Upload the app logo from
-   [`public/arrow-fat-lines-right-duotone.svg`](public/arrow-fat-lines-right-duotone.svg).
+   [`public/signpost-duotone.svg`](public/signpost-duotone.svg).
 8. Set up custom authorization: create client credentials of type
    **Single-page app**, and register your deployment origin
    (`https://<your-deployment>`) as callback URL (with a trailing `/`), logout

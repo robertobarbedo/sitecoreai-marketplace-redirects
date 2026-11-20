@@ -94,7 +94,7 @@ Off. The app does not use AI or machine learning.
   - `NEXT_PUBLIC_SITECORE_APP_ID` (required)
   - `SECRET_ENCRYPTION_KEY` (required to save Vercel bypass secrets; server-only, 16+ characters)
   - Optional: `NEXT_PUBLIC_AUTH0_DOMAIN`, `NEXT_PUBLIC_AUTH0_AUDIENCE`, `NEXT_PUBLIC_AUTH0_SCOPE`, `AUTH0_ISSUER`, `CSP_FRAME_ANCESTORS`
-- App logo: `public/arrow-fat-lines-right-duotone.svg`
+- App logo: `public/signpost-duotone.svg`
 
 ## 11. Submission details (visible only to Sitecore)
 

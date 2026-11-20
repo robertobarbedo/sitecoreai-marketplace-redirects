@@ -127,7 +127,10 @@ changes).
   401/403 is reported as "site asks for a login".
 - No other secrets are stored. No analytics.
 
-## NOT verified against a live environment
+## Live-environment assumptions (all passed live QA on 2026-11-20)
+
+The user ran the full SUBMISSION.md §12 checklist in SitecoreAI and everything
+worked. Keep this list: if one of these breaks later, it is where to look.
 
 `npm run build` cannot type-check GraphQL. Each shape is isolated in one
 function in `src/utils/sitecore-graphql.ts`:
