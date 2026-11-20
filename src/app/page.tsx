@@ -86,6 +86,7 @@ import {
   saveSettings,
 } from "@/src/utils/settings";
 import {
+  listChildren,
   listSites,
   queryItem,
   readEnvironments,
@@ -1247,6 +1248,13 @@ export default function RedirectManager() {
           language={language}
           languageCount={allLanguages.length}
           defaultPublish={setup?.publishOnSave ?? true}
+          treeRootPath={site ? `${site.rootPath}${site.startItem}` : ""}
+          routeRootPath={siteContext?.rootPath ?? ""}
+          onLoadChildren={(path) =>
+            client && env
+              ? listChildren(client, env.contextId, path, language)
+              : Promise.resolve([])
+          }
           onResolve={(input) =>
             client && siteContext
               ? resolveDestination(client, env.contextId, siteContext, input)

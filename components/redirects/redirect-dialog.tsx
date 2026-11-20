@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { mdiAlertCircleOutline, mdiCheck, mdiLoading } from "@mdi/js";
+import {
+  mdiAlertCircleOutline,
+  mdiCheck,
+  mdiFileTreeOutline,
+  mdiLoading,
+} from "@mdi/js";
 
 import { Tag } from "@/components/redirects/badges";
+import { ContentTreeDialog } from "@/components/redirects/content-tree-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -17,8 +23,11 @@ import {
 import { Icon } from "@/lib/icon";
 import { cn } from "@/lib/utils";
 import type { RedirectDraft, RedirectRow } from "@/src/types/redirects";
-import type { SitecoreItemRef } from "@/src/utils/sitecore-graphql";
-import { displayBase } from "@/src/utils/urls";
+import type {
+  SitecoreItemRef,
+  TreeNode,
+} from "@/src/utils/sitecore-graphql";
+import { displayBase, routeOf } from "@/src/utils/urls";
 
 // Sentence-case labels (not the uppercase field-label style) so they read as
 // "type here" prompts rather than section headings.
@@ -78,7 +87,10 @@ export function RedirectDialog({
   language,
   languageCount,
   defaultPublish,
+  treeRootPath,
+  routeRootPath,
   onResolve,
+  onLoadChildren,
   onSubmit,
   onClose,
 }: {
@@ -91,7 +103,12 @@ export function RedirectDialog({
   /** Languages of the site, for the "all languages" option. */
   languageCount: number;
   defaultPublish: boolean;
+  /** Sitecore path of the site's Home item, the content tree's root. */
+  treeRootPath: string;
+  /** Item path that answers the site URL's `/` (for showing picked routes). */
+  routeRootPath: string;
   onResolve: (input: string) => Promise<SitecoreItemRef | null>;
+  onLoadChildren: (path: string) => Promise<TreeNode[]>;
   onSubmit: (draft: RedirectDraft) => void;
   onClose: () => void;
 }) {
@@ -105,6 +122,7 @@ export function RedirectDialog({
     undefined,
   );
   const [checking, setChecking] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
   const [externalUrl, setExternalUrl] = useState("");
   const [allLanguages, setAllLanguages] = useState(false);
   const [publish, setPublish] = useState(defaultPublish);
@@ -133,6 +151,7 @@ export function RedirectDialog({
     setPublish(defaultPublish);
     setError("");
     setChecking(false);
+    setBrowsing(false);
   }, [open, row, defaultPublish]);
 
   const check = async (): Promise<SitecoreItemRef | null> => {
@@ -148,6 +167,24 @@ export function RedirectDialog({
     } catch {
       setResolved(null);
       return null;
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  // A page picked in the tree. The Home row has no id yet, so resolve it.
+  const pick = async (item: SitecoreItemRef) => {
+    setBrowsing(false);
+    setInternalInput(routeOf(item.path, routeRootPath) ?? item.path);
+    if (item.itemId) {
+      setResolved({ itemId: item.itemId, name: item.name, path: item.path });
+      return;
+    }
+    setChecking(true);
+    try {
+      setResolved(await onResolve(item.path));
+    } catch {
+      setResolved(null);
     } finally {
       setChecking(false);
     }
@@ -266,29 +303,31 @@ export function RedirectDialog({
             Send visitors to
             <Required />
           </label>
-          {/* Quiet segmented control: purple stays reserved for the primary
-              action, so the eye goes to the input below. */}
-          <div className="inline-flex w-fit gap-0.5 rounded-lg bg-surface-container p-0.5">
+          <div
+            role="radiogroup"
+            aria-label="Destination type"
+            className="flex flex-wrap items-center gap-x-6 gap-y-1 py-0.5"
+          >
             {(
               [
                 ["internal", "Page in this site"],
                 ["external", "External URL"],
               ] as const
             ).map(([value, label]) => (
-              <button
+              <label
                 key={value}
-                type="button"
-                aria-pressed={kind === value}
-                onClick={() => setKind(value)}
-                className={cn(
-                  "h-7 rounded-md px-3 text-xs font-semibold outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-primary/50",
-                  kind === value
-                    ? "bg-white text-on-surface shadow-xs"
-                    : "text-on-surface-variant hover:text-on-surface",
-                )}
+                className="flex cursor-pointer items-center gap-2 text-sm text-on-surface"
               >
+                <input
+                  type="radio"
+                  name="redirect-destination-kind"
+                  value={value}
+                  checked={kind === value}
+                  onChange={() => setKind(value)}
+                  className="size-4 shrink-0 cursor-pointer accent-[var(--primary)] outline-none focus-visible:ring-[3px] focus-visible:ring-primary/50"
+                />
                 {label}
-              </button>
+              </label>
             ))}
           </div>
 
@@ -314,11 +353,12 @@ export function RedirectDialog({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mr-1"
-                  disabled={checking || !internalInput.trim()}
-                  onClick={() => void check()}
+                  className="mr-1 gap-1.5"
+                  disabled={checking || !treeRootPath}
+                  onClick={() => setBrowsing(true)}
                 >
-                  Check
+                  <Icon path={mdiFileTreeOutline} size={0.6} />
+                  Browse
                 </Button>
               </div>
               <div className="flex min-h-5 items-center gap-1.5 text-xs">
@@ -350,8 +390,8 @@ export function RedirectDialog({
                 )}
                 {!checking && resolved === undefined && (
                   <span className="text-text-subtle">
-                    A path below the site URL, a full Sitecore path or an item
-                    ID.
+                    Browse the content tree, or type a path below the site URL,
+                    a full Sitecore path or an item ID.
                   </span>
                 )}
               </div>
@@ -431,6 +471,15 @@ export function RedirectDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <ContentTreeDialog
+        open={browsing}
+        rootPath={treeRootPath}
+        initialPath={resolved?.path}
+        onLoadChildren={onLoadChildren}
+        onPick={(item) => void pick(item)}
+        onClose={() => setBrowsing(false)}
+      />
     </Dialog>
   );
 }

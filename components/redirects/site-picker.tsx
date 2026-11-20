@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { mdiCheck, mdiChevronDown, mdiCog, mdiMagnify } from "@mdi/js";
+import { mdiCheck, mdiChevronDown, mdiCog, mdiMagnify, mdiWeb } from "@mdi/js";
 
 import { Tag } from "@/components/redirects/badges";
 import { Icon } from "@/lib/icon";
@@ -156,6 +156,14 @@ export function SitePicker({
                         isSelected && "bg-primary-bg hover:bg-primary-bg",
                       )}
                     >
+                      <Icon
+                        path={mdiWeb}
+                        size={0.65}
+                        className={cn(
+                          "shrink-0 text-on-surface-variant",
+                          !url.base && "opacity-40",
+                        )}
+                      />
                       <span
                         className={cn(
                           "min-w-0 flex-1 truncate font-mono text-[13px] font-medium",

@@ -307,6 +307,47 @@ export async function queryItem(
   return data.item?.itemId ? data.item : null;
 }
 
+export interface TreeNode extends SitecoreItemRef {
+  hasChildren: boolean;
+}
+
+/**
+ * Direct children of an item, for the content tree picker. Same
+ * `children { nodes { … hasChildren } }` shape the publishing-center tree uses.
+ */
+export async function listChildren(
+  client: ClientSDK,
+  sitecoreContextId: string,
+  idOrPath: string,
+  language: string,
+): Promise<TreeNode[]> {
+  const data = await runAuthoring<{
+    item?: { children?: { nodes?: TreeNode[] | null } | null } | null;
+  }>(
+    client,
+    sitecoreContextId,
+    `
+      query {
+        item(where: {
+          database: "${MASTER_DATABASE}"
+          ${itemLocator(idOrPath)}
+          language: "${escapeGraphQL(language)}"
+        }) {
+          children {
+            nodes {
+              itemId
+              name
+              path
+              hasChildren
+            }
+          }
+        }
+      }
+    `,
+  );
+  return (data.item?.children?.nodes ?? []).filter((node) => node?.itemId);
+}
+
 /** One field's raw value off an item, or null when the item doesn't exist. */
 export async function getItemFieldValue(
   client: ClientSDK,
