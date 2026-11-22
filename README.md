@@ -12,6 +12,8 @@ This app puts the redirects of a site and language on one screen. You can
 list, create, edit, delete, publish and test them against the live site
 without leaving SitecoreAI.
 
+![Every redirect of a site on one screen, tested against the live site](.screenshots/1%20-%20Every%20redirect%20of%20a%20site%20on%20one%20screen%2C%20tested%20against%20the%20live%20site.png)
+
 ## Features
 
 - **Site and language picker**: one dropdown grouped by site, showing each
@@ -72,6 +74,32 @@ Both routes require a signed-in Sitecore Cloud user of this app.
   returned. Rate limited per user.
 - `POST /api/vercel-secret`: seals a Vercel bypass secret and returns only
   the encrypted form.
+
+## Screenshots
+
+**1. Every redirect of a site on one screen, tested against the live site**
+
+![Every redirect of a site on one screen, tested against the live site](.screenshots/1%20-%20Every%20redirect%20of%20a%20site%20on%20one%20screen%2C%20tested%20against%20the%20live%20site.png)
+
+**2. Create a redirect to a page in the site or an external URL**
+
+![Create a redirect to a page in the site or an external URL](.screenshots/2%20-%20Create%20a%20redirect%20to%20a%20page%20in%20the%20site%20or%20an%20external%20URL.png)
+
+**3. Publish and test in one step, with live progress**
+
+![Publish and test in one step, with live progress](.screenshots/3%20-%20Publish%20and%20test%20in%20one%20step%2C%20with%20live%20progress.png)
+
+**4. Know the redirect works the moment it is live**
+
+![Know the redirect works the moment it is live](.screenshots/4%20-%20Know%20the%20redirect%20works%20the%20moment%20it%20is%20live.png)
+
+**5. Settings - Set the template, field and live URLs for each site**
+
+![Settings - Set the template, field and live URLs for each site](.screenshots/5%20-%20Settings%20-%20Set%20the%20template%2C%20field%20and%20live%20URLs%20for%20each%20site.png)
+
+**6. Settings - Test sites behind Vercel Deployment Protection**
+
+![Settings - Test sites behind Vercel Deployment Protection](.screenshots/6%20-%20Settings%20-%20Test%20sites%20behind%20Vercel%20Deployment%20Protection.png)
 
 ## Requirements
 
